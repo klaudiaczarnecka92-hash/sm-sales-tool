@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SM Sales Tool</title>
+<style>
+:root{
+  --bg:#ffffff;--bg2:#f7f7f5;--bg3:#f0efe9;
+  --text:#1a1a18;--text2:#5a5a56;--text3:#9a9a94;
+  --border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.18);
+  --blue:#2563eb;--blue-bg:#eff6ff;--blue-text:#1d4ed8;
+  --green-bg:#ecfdf5;--green-text:#065f46;--green-border:#10b981;
+  --red-bg:#fef2f2;--red-text:#991b1b;
+  --amber-bg:#fffbeb;--amber-text:#92400e;
+  --radius:8px;--radius-lg:12px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1c1c1a;--bg2:#252523;--bg3:#2e2e2b;
+    --text:#e8e8e2;--text2:#a0a09a;--text3:#606058;
+    --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.18);
+    --blue-bg:#1e3a5f;--blue-text:#93c5fd;
+    --green-bg:#064e3b;--green-text:#6ee7b7;
+    --red-bg:#450a0a;--red-text:#fca5a5;
+    --amber-bg:#451a03;--amber-text:#fcd34d;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);font-size:15px;}
+input,textarea,select,button{font-family:inherit;font-size:14px;color:var(--text);}
+input,textarea,select{background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius);padding:8px 11px;outline:none;transition:border-color .15s;}
+input:focus,textarea:focus,select:focus{border-color:var(--blue);}
+textarea{resize:vertical;}
+
+/* LAYOUT */
+.shell{display:flex;height:100vh;overflow:hidden;}
+.sidebar{width:200px;min-width:200px;border-right:0.5px solid var(--border);display:flex;flex-direction:column;padding:16px 12px;}
+.logo{font-size:14px;font-weight:600;letter-spacing:-.02em;padding:4px 4px 16px;border-bottom:0.5px solid var(--border);margin-bottom:12px;}
+.logo span{color:var(--blue);}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--radius);cursor:pointer;font-size:13px;color:var(--text2);transition:all .12s;border:none;background:transparent;width:100%;text-align:left;}
+.nav-item:hover{background:var(--bg2);color:var(--text);}
+.nav-item.active{background:var(--bg2);color:var(--text);font-weight:500;}
+.nav-icon{font-size:15px;width:18px;text-align:center;}
+.main{flex:1;overflow-y:auto;padding:28px 32px;}
+@media(max-width:640px){.sidebar{display:none;}.main{padding:16px;}}
+
+/* VIEWS */
+.view{display:none;max-width:860px;}.view.active{display:block;}
+.page-h{font-size:20px;font-weight:600;margin-bottom:4px;}
+.page-sub{font-size:14px;color:var(--text2);margin-bottom:24px;}
+
+/* CARDS */
+.card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:12px;}
+.clabel{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;}
+
+/* CHEAT TABS */
+.track-tabs{display:flex;gap:8px;margin-bottom:16px;}
+.ttab{flex:1;padding:10px;border-radius:var(--radius);border:0.5px solid var(--border2);background:transparent;font-size:13px;font-weight:500;cursor:pointer;text-align:center;color:var(--text2);transition:all .12s;}
+.ttab.c-client.active{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue);}
+.ttab.c-team.active{background:var(--green-bg);color:var(--green-text);border-color:var(--green-border);}
+.tpanel{display:none;}.tpanel.active{display:block;}
+
+/* ACCORDION */
+.cat-wrap{margin-bottom:10px;}
+.cat-head{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--bg2);border-radius:var(--radius);cursor:pointer;border:0.5px solid var(--border);}
+.cat-head.open{border-radius:var(--radius) var(--radius) 0 0;}
+.cat-title{font-size:14px;font-weight:500;flex:1;}
+.cat-icon{font-size:15px;width:20px;text-align:center;}
+.cat-arrow{font-size:10px;color:var(--text3);transition:transform .2s;}
+.cat-head.open .cat-arrow{transform:rotate(180deg);}
+.cat-body{display:none;border:0.5px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);}
+.cat-body.open{display:block;}
+.qrow{padding:11px 16px;border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:14px;}
+.qrow:last-child{border-bottom:none;}
+.qtext{font-size:13px;line-height:1.55;}
+.qtip{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.35;}
+.badge{font-size:10px;padding:2px 8px;border-radius:99px;white-space:nowrap;flex-shrink:0;}
+.b-hot{background:var(--red-bg);color:var(--red-text);}
+.b-ai{background:var(--blue-bg);color:var(--blue-text);}
+.b-biz{background:var(--amber-bg);color:var(--amber-text);}
+.b-proc{background:var(--green-bg);color:var(--green-text);}
+
+/* CLIENT INTEL */
+.ci-wrap{display:grid;grid-template-columns:260px 1fr;gap:16px;}
+@media(max-width:700px){.ci-wrap{grid-template-columns:1fr;}}
+.cl-list{border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;max-height:82vh;display:flex;flex-direction:column;}
+.cl-search{padding:10px 12px;border-bottom:0.5px solid var(--border);}
+.cl-search input{width:100%;border:none;background:transparent;outline:none;font-size:13px;}
+.cl-scroll{overflow-y:auto;flex:1;}
+.cl-item{padding:10px 14px;cursor:pointer;border-bottom:0.5px solid var(--border);transition:background .1s;}
+.cl-item:last-child{border-bottom:none;}
+.cl-item:hover,.cl-item.sel{background:var(--bg2);}
+.cl-name{font-size:13px;font-weight:500;}
+.cl-meta{font-size:11px;color:var(--text2);margin-top:2px;}
+.cl-rank{float:right;font-size:10px;color:var(--text3);font-weight:600;}
+
+.intel-col{display:flex;flex-direction:column;gap:12px;overflow-y:auto;max-height:82vh;padding-right:4px;}
+.intel-col label{display:block;font-size:12px;color:var(--text2);margin-bottom:4px;margin-top:10px;}
+.intel-col label:first-of-type{margin-top:0;}
+.intel-col input,.intel-col textarea,.intel-col select{width:100%;}
+.intel-col textarea{min-height:74px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* BUTTONS */
+.btn{display:block;width:100%;padding:11px;border:none;border-radius:var(--radius);font-size:14px;font-weight:500;cursor:pointer;transition:opacity .15s;margin-top:6px;}
+.btn-primary{background:var(--blue);color:#fff;}
+.btn-primary:hover{opacity:.88;}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;}
+.btn-sec{background:var(--bg2);color:var(--text);border:0.5px solid var(--border2);}
+.btn-sec:hover{background:var(--bg3);}
+
+/* RESULTS */
+.spinner{width:22px;height:22px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.load-box{text-align:center;padding:36px;color:var(--text2);font-size:13px;}
+.ritem{font-size:13px;padding:7px 0;border-bottom:0.5px solid var(--border);line-height:1.5;}
+.ritem:last-child{border-bottom:none;}
+.obj-box{background:var(--bg2);border-left:2.5px solid #93c5fd;border-radius:0 var(--radius) var(--radius) 0;padding:10px 14px;margin-bottom:8px;}
+.obj-q{font-size:13px;font-weight:500;margin-bottom:4px;}
+.obj-a{font-size:13px;color:var(--text2);line-height:1.5;}
+.tag{display:inline-block;font-size:11px;padding:3px 9px;border-radius:99px;margin:2px 3px 2px 0;}
+.tg{background:var(--green-bg);color:var(--green-text);}
+.tb{background:var(--blue-bg);color:var(--blue-text);}
+.ta{background:var(--amber-bg);color:var(--amber-text);}
+.tr{background:var(--red-bg);color:var(--red-text);}
+.mono-box{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;font-size:12px;line-height:1.8;white-space:pre-wrap;font-family:ui-monospace,monospace;position:relative;}
+.copy-btn{font-size:11px;color:var(--blue);background:none;border:none;cursor:pointer;}
+.res-label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;}
+.res-sec{margin-bottom:16px;}
+.sep{height:0.5px;background:var(--border);margin:20px 0;}
+.rev-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:14px;}
+.rev-val{font-size:18px;font-weight:600;text-align:right;}
+.rev-jan{font-size:11px;color:var(--text2);margin-top:2px;}
+.q-ans{width:100%;margin-top:8px;min-height:60px;display:block;}
+.btn-small{font-size:11px;padding:4px 8px;width:auto;display:inline-block;margin-top:0;}
+.export-btns{display:flex;gap:8px;margin-top:16px;}
+@media print {
+  .sidebar, .track-tabs, #api-key-input, .cl-list, .btn, .copy-btn, .sep, .nav-item, #v-cheat { display: none !important; }
+  .main { padding: 0; }
+  .card { border: 1px solid #ccc; break-inside: avoid; }
+  .view.active { display: block !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="logo">⚡ <span>Software Mind</span><br><span style="font-size:11px;font-weight:400;color:var(--text2);">Sales Tool</span></div>
+  <button class="nav-item active" onclick="nav('cheat',this)"><span class="nav-icon">📋</span> Question Cheat Sheet</button>
+  <button class="nav-item" onclick="nav('intel',this)"><span class="nav-icon">🔍</span> Client Intel</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+<div style="background:#fef9c3;border-bottom:1px solid #fde047;padding:10px 32px;display:flex;align-items:center;gap:12px;font-size:13px;">
+  <span style="font-weight:500;white-space:nowrap;">🔑 Anthropic API Key:</span>
+  <input id="api-key-input" type="password" placeholder="sk-ant-..." style="flex:1;max-width:420px;background:#fff;border:1px solid #fde047;border-radius:6px;padding:6px 10px;font-size:13px;color:#1a1a18;"/>
+  <span style="color:#92400e;">Get it at <a href="https://console.anthropic.com" target="_blank" style="color:#92400e;">console.anthropic.com</a> → API Keys</span>
+</div>
+
+  <!-- CHEAT SHEET -->
+  <div class="view active" id="v-cheat">
+    <div class="page-h">Question Cheat Sheet</div>
+    <div class="page-sub">Enterprise · Cloud / AI / Data · Modernization & Development Acceleration</div>
+
+    <div class="track-tabs">
+      <button class="ttab c-client active" onclick="trackTab('tc',this)">🎯 Questions for the Client</button>
+      <button class="ttab c-team" onclick="trackTab('tt',this)">👥 Questions for Our Embedded Team</button>
+    </div>
+
+    <!-- CLIENT -->
+    <div class="tpanel active" id="tc">
+      <div style="margin-bottom:12px;display:flex;justify-content:flex-end;">
+        <button class="btn btn-sec btn-small" onclick="clearAllAnswers()">Clear All Answers</button>
+      </div>
+      <div id="cats-client"></div>
+    </div>
+
+    <!-- TEAM -->
+    <div class="tpanel" id="tt">
+      <div style="font-size:13px;color:var(--text2);background:var(--bg2);border-radius:var(--radius);padding:10px 14px;margin-bottom:14px;">Questions for <strong>our team embedded at the client</strong> — internal conversation before a sales meeting or account review.</div>
+      <div id="cats-team"></div>
+    </div>
+  </div>
+
+  <!-- CLIENT INTEL -->
+  <div class="view" id="v-intel">
+    <div class="page-h">Client Intel</div>
+    <div class="page-sub">Select a client → add research and team insights → Claude generates a sales brief.</div>
+    <div class="ci-wrap">
+      <div class="cl-list">
+        <div class="cl-search"><input type="text" id="cl-q" placeholder="🔍 Search..." oninput="filterC(this.value)"/></div>
+        <div class="cl-scroll" id="cl-body"></div>
+      </div>
+      <div class="intel-col" id="intel-col">
+        <div class="card" style="text-align:center;padding:40px;color:var(--text2);">
+          <div style="font-size:32px;margin-bottom:8px;">👈</div>
+          <div style="font-size:13px;">Select a client from the list</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────
+const CLIENTS=[
+  {rank:1,name:"Rawlings Group",vertical:"Insurance / Payments",sales:"Mike Solak",rev:4022525,jan:126240},
+  {rank:2,name:"NerdWallet",vertical:"Financial Services",sales:"Mike Solak",rev:3233101,jan:415128},
+  {rank:3,name:"Aderant",vertical:"LegalTech",sales:"Tim Rahill",rev:2928011,jan:239214},
+  {rank:4,name:"Airia LLC",vertical:"IT & Services / AI",sales:"Grazzia Paz",rev:2658660,jan:292128},
+  {rank:5,name:"GS1 US Inc.",vertical:"Supply Chain - Non Profit",sales:"Kate Alexander",rev:2230315,jan:213319},
+  {rank:6,name:"Expressable",vertical:"Healthcare",sales:"Fernando Jud.",rev:1835413,jan:155799},
+  {rank:7,name:"Humana",vertical:"Insurance",sales:"Mike Solak",rev:1600562,jan:45483},
+  {rank:8,name:"Farm Credit Mid-America",vertical:"Financial Services",sales:"Mike Solak",rev:1596375,jan:157284},
+  {rank:9,name:"Oliver Wyman",vertical:"Logistics & Supply Chain",sales:"Kate Alexander",rev:1558230,jan:84254},
+  {rank:10,name:"Jack Henry",vertical:"FinTech",sales:"Tim Rahill",rev:1262835,jan:68268},
+  {rank:11,name:"ArcBest Technologies",vertical:"Logistics & Supply Chain",sales:"Tim Rahill",rev:1184496,jan:113991},
+  {rank:12,name:"Houseful",vertical:"Residential Property Technology",sales:"Fernando Jud.",rev:1041743,jan:75469},
+  {rank:13,name:"Disco",vertical:"Legal Software",sales:"Fernando Jud.",rev:971059,jan:62500},
+  {rank:14,name:"PowerPlan",vertical:"Software for Energy Sector",sales:"Tim Rahill",rev:963866,jan:87344},
+  {rank:15,name:"Cox Automotive DBA Fleet",vertical:"Fleet Management / Automotive",sales:"Tim Rahill",rev:912765,jan:28266},
+  {rank:16,name:"Saralux",vertical:"Software Development Consulting",sales:"House",rev:887390,jan:60003},
+  {rank:17,name:"Beck Technology",vertical:"Construction",sales:"Fernando Jud.",rev:659505,jan:90400},
+  {rank:18,name:"Archimetics (TCLabs)",vertical:"Technology",sales:"Fernando Jud.",rev:658912,jan:65300},
+  {rank:19,name:"Wind River",vertical:"Mission Critical Software",sales:"Tim Rahill",rev:619708,jan:22661},
+  {rank:20,name:"Setpoint",vertical:"FinTech",sales:"Fernando Jud.",rev:613830,jan:115200}
+];
+
+const CLIENT_CATS=[
+  {icon:"🏗️",title:"Tech Stack & Architecture",qs:[
+    {t:"What does your current stack look like — on-prem, cloud, hybrid? Which provider (AWS/Azure/GCP) and to what extent?",tip:"Understand cloud maturity and the white space for entry",b:"b-hot",bl:"🔥 must ask"},
+    {t:"Do you have legacy systems that are 'holding back' the rest of the organization? Which ones, and why haven't they been modernized yet?",tip:"Find where the pain is and why nobody has solved it yet",b:"b-hot",bl:"🔥 must ask"},
+    {t:"How do you manage dependencies between systems — integrations, APIs, messaging? Where is the biggest chaos?",b:"b-proc",bl:"process"},
+    {t:"What is your level of technical debt, and do you have the budget and mandate to address it?",tip:"Key: is there political will and funding in place",b:"b-biz",bl:"business"},
+    {t:"How many environments do you have (dev/staging/prod) and how are they managed? Is IaC in use?",b:"b-proc",bl:"process"},
+    {t:"What does your disaster recovery look like, and what are the SLAs for critical systems? When did you last test them?",b:"b-hot",bl:"🔥 must ask"},
+  ]},
+  {icon:"🤖",title:"AI, Automation & Data",qs:[
+    {t:"Where could AI save your team the most time today — what tasks are repetitive and manual?",tip:"Look for: support, documentation, testing, analytics, code generation",b:"b-ai",bl:"AI"},
+    {t:"Are your developers already using AI in their daily work (Copilot, Cursor, Codeium)? What is the organization's attitude toward it?",b:"b-ai",bl:"AI"},
+    {t:"How does your data landscape look — is it centralized or siloed? Who 'owns' data in the organization?",tip:"No data, no AI — assess data readiness first",b:"b-ai",bl:"AI"},
+    {t:"Have you had any previous AI/ML initiatives? What worked, what didn't, and why?",tip:"The history of past attempts reveals what is really blocking progress",b:"b-hot",bl:"🔥 must ask"},
+    {t:"What business decisions should be driven by real-time data but currently are not?",b:"b-biz",bl:"business"},
+    {t:"Is compliance (GDPR, AI Act, industry regulations) a barrier to AI adoption? Who manages this?",b:"b-ai",bl:"AI"},
+  ]},
+  {icon:"⚙️",title:"Development & Engineering Processes",qs:[
+    {t:"How long does it take from idea to production? Where is the biggest bottleneck?",tip:"Time-to-market is a KPI every CTO and CEO understands",b:"b-hot",bl:"🔥 must ask"},
+    {t:"What does your SDLC look like — what percentage of work is manual (testing, deploy, code review, documentation)?",b:"b-proc",bl:"process"},
+    {t:"How frequently do you deploy to production? What prevents higher deployment frequency?",b:"b-proc",bl:"process"},
+    {t:"What is your test coverage like — do you have CI/CD? What fails in the pipeline most often?",b:"b-proc",bl:"process"},
+    {t:"How do you measure engineering team productivity? DORA metrics, velocity, something else?",b:"b-biz",bl:"business"},
+    {t:"Do you struggle with onboarding new developers? How long before they become productive?",b:"b-proc",bl:"process"},
+  ]},
+  {icon:"🎯",title:"Business Goals & Strategy",qs:[
+    {t:"What are your top 3 technology priorities for the next 12 months? What absolutely must happen?",tip:"Position SM against those priorities — not against your own service catalog",b:"b-hot",bl:"🔥 must ask"},
+    {t:"What happens to your organization if in 2 years you are still running on your current technology stack?",tip:"Implication question — builds urgency",b:"b-biz",bl:"business"},
+    {t:"Where are you losing competitive advantage because of technology constraints?",b:"b-hot",bl:"🔥 must ask"},
+    {t:"How is your technology budget structured — CAPEX vs OPEX? Is there a separate innovation budget?",b:"b-biz",bl:"business"},
+    {t:"Who is the primary decision-maker when choosing a technology partner, and what are their criteria?",b:"b-biz",bl:"business"},
+    {t:"What have your experiences been with external technology partners — what worked, what didn't?",b:"b-biz",bl:"business"},
+  ]},
+  {icon:"☁️",title:"Cloud & Modernization",qs:[
+    {t:"Do you have a cloud migration roadmap? What is on the 'too risky / too expensive' list, and why?",b:"b-hot",bl:"🔥 must ask"},
+    {t:"How do you manage cloud costs? Do you have FinOps in place — who is responsible?",tip:"Often a pain point — costs grew faster than the value delivered",b:"b-biz",bl:"business"},
+    {t:"What are your security and compliance requirements for cloud workloads (ISO, SOC2, DORA, NIS2)?",b:"b-proc",bl:"process"},
+    {t:"Do you have a multi-cloud strategy or are you all-in on a single provider? Why?",b:"b-proc",bl:"process"},
+    {t:"Which applications are causing the biggest scalability problems today?",b:"b-hot",bl:"🔥 must ask"},
+  ]},
+];
+
+const TEAM_CATS=[
+  {icon:"🏗️",title:"Technical State — What Do You See From the Inside?",qs:[
+    {t:"How would you rate the maturity of their architecture on a scale of 1–10? Where are the biggest technical gaps?",b:"b-hot",bl:"priority"},
+    {t:"Which legacy systems do you see that are treated as 'untouchable sacred cows'? Why does nobody touch them?",tip:"Is it politics, technical risk, or lack of budget?",b:"b-hot",bl:"priority"},
+    {t:"Do you see the client's developers wasting time on tasks that AI or automation could take over?",b:"b-ai",bl:"AI opp."},
+    {t:"What is the state of code quality, test coverage, and documentation? Is there technical debt blocking development?",b:"b-proc",bl:"process"},
+    {t:"Are they using modern dev tools (Copilot, Cursor, DORA metrics)? What is the climate for adoption?",b:"b-ai",bl:"AI opp."},
+  ]},
+  {icon:"🤝",title:"Organizational Dynamics & Relationships",qs:[
+    {t:"Who really makes technology decisions? Does the CTO/CDO have a mandate for change, or are they being blocked?",tip:"Critical for identifying who our internal champion is",b:"b-hot",bl:"priority"},
+    {t:"How is Software Mind perceived internally — as a strategic partner or 'body leasing'? What can we do to change that?",b:"b-biz",bl:"relationship"},
+    {t:"Is there someone who is our internal advocate, and someone who is skeptical or blocking us?",b:"b-biz",bl:"relationship"},
+    {t:"What are the tensions between the client's teams (business vs IT, engineering vs product)?",b:"b-proc",bl:"process"},
+    {t:"What projects are being planned in the next 6 months that we at SM don't know about yet?",tip:"Early pipeline intel — upsell and new project opportunities",b:"b-hot",bl:"priority"},
+  ]},
+  {icon:"💡",title:"Expansion Opportunities (Upsell)",qs:[
+    {t:"Where is the client using another external vendor instead of us? Why, and can we change that?",b:"b-biz",bl:"upsell"},
+    {t:"What technical or business topics come up regularly in conversations but we are not addressing?",b:"b-biz",bl:"upsell"},
+    {t:"Do you see an opening for AI/ML, cloud, or data — something the client wants but doesn't know how to start?",b:"b-ai",bl:"AI opp."},
+    {t:"How would you rate the NPS of our team at the client — what is working great, and what is a risk to the relationship?",b:"b-proc",bl:"relationship"},
+    {t:"Has the client mentioned budget concerns for IT? Are there plans for cuts or a shift in priorities?",tip:"Early warning signal for relationship risk management",b:"b-biz",bl:"risk"},
+  ]},
+  {icon:"🤖",title:"AI Readiness — What Do You See From the Inside?",qs:[
+    {t:"How mature is the client's data — is it 'AI-ready'? What is the quality, accessibility, and governance like?",b:"b-ai",bl:"AI opp."},
+    {t:"Do you see processes where LLMs or generative AI could accelerate the client's work — internally or in their products?",b:"b-ai",bl:"AI opp."},
+    {t:"What is the organizational attitude toward AI — enthusiasm, fear of replacement, indifference? Who is driving it?",b:"b-ai",bl:"AI opp."},
+    {t:"Could SM introduce an 'AI dev productivity' program for the client's developers?",b:"b-ai",bl:"AI opp."},
+  ]},
+];
+
+// ── STORAGE ───────────────────────────────────────────────
+function saveAns(qid, val){
+  const answers = JSON.parse(localStorage.getItem('sm_answers') || '{}');
+  answers[qid] = val;
+  localStorage.setItem('sm_answers', JSON.stringify(answers));
+}
+function getAns(qid){
+  const answers = JSON.parse(localStorage.getItem('sm_answers') || '{}');
+  return answers[qid] || '';
+}
+function clearAllAnswers(){
+  if(confirm('Clear all answers?')){
+    localStorage.removeItem('sm_answers');
+    location.reload();
+  }
+}
+
+// ── RENDER CHEAT ──────────────────────────────────────────
+function buildCats(cats, containerId, prefix) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = cats.map((cat, ci) => `
+    <div class="cat-wrap">
+      <div class="cat-head open" onclick="toggleCat(this)">
+        <span class="cat-icon">${cat.icon}</span>
+        <span class="cat-title">${cat.title}</span>
+        <span class="cat-arrow">▼</span>
+      </div>
+      <div class="cat-body open">
+        ${cat.qs.map((q, qi)=>`
+          <div class="qrow" style="flex-direction:column;align-items:stretch;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;width:100%;">
+              <div>
+                <div class="qtext">${q.t}</div>
+                ${q.tip?`<div class="qtip">${q.tip}</div>`:''}
+              </div>
+              <span class="badge ${q.b}">${q.bl}</span>
+            </div>
+            <textarea class="q-ans" placeholder="Type answer here..." oninput="saveAns('${prefix}_${ci}_${qi}', this.value)">${getAns(prefix+'_'+ci+'_'+qi)}</textarea>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function toggleCat(h){
+  h.classList.toggle('open');
+  h.nextElementSibling.classList.toggle('open');
+}
+
+// ── CLIENT LIST ───────────────────────────────────────────
+let filteredC=[...CLIENTS], selC=null;
+function fmt(n){return '$'+n.toLocaleString('en-US');}
+
+function renderC(){
+  document.getElementById('cl-body').innerHTML = filteredC.map(c=>`
+    <div class="cl-item${selC&&selC.rank===c.rank?' sel':''}" onclick="selClient(${c.rank})">
+      <span class="cl-rank">#${c.rank}</span>
+      <div class="cl-name">${c.name}</div>
+      <div class="cl-meta">${c.vertical||'—'} · ${c.sales}</div>
+    </div>`).join('');
+}
+
+function filterC(q){
+  const lq=q.toLowerCase();
+  filteredC=CLIENTS.filter(c=>c.name.toLowerCase().includes(lq)||c.vertical.toLowerCase().includes(lq)||c.sales.toLowerCase().includes(lq));
+  renderC();
+}
+
+function selClient(rank){
+  selC=CLIENTS.find(c=>c.rank===rank);
+  renderC();
+  renderIntelForm();
+}
+
+function renderIntelForm(){
+  const c=selC;
+  const trend=c.jan>(c.rev/12)?'📈':'📉';
+  document.getElementById('intel-col').innerHTML=`
+    <div class="card">
+      <div class="rev-row">
+        <div><div style="font-size:17px;font-weight:600;">${c.name}</div><div style="font-size:12px;color:var(--text2);margin-top:3px;">${c.vertical} · AE: ${c.sales}</div></div>
+        <div><div class="rev-val">${fmt(c.rev)}</div><div class="rev-jan">Revenue 2025 · Jan-26: ${fmt(c.jan)} ${trend}</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="clabel">Pre-call Research</div>
+      <label>What do we know about the client (pain points, industry context, recent news)</label>
+      <textarea id="i-res" placeholder="e.g. ${c.name} announced a 15% IT cost reduction, moving to cloud-first, struggling with legacy mainframe..."></textarea>
+      <div class="row2" style="margin-top:8px;">
+        <div><label>Goal of the conversation</label><input type="text" id="i-goal" placeholder="e.g. Upsell AI dev tools"/></div>
+        <div><label>Persona on the other side</label><input type="text" id="i-pers" placeholder="e.g. CTO, VP Engineering"/></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="clabel">Insights from Our Embedded Team</div>
+      <label>What does our team see from the inside? (technology, relationships, opportunities)</label>
+      <textarea id="i-team" placeholder="e.g. No CI/CD in place, developers not using AI tools, CTO wants change but legal is blocking, planning a new product in Q3..."></textarea>
+    </div>
+    <div class="card">
+      <div class="clabel">Fireflies Transcript (optional)</div>
+      <label>Paste the transcript from the last meeting</label>
+      <textarea id="i-trans" style="min-height:90px;" placeholder="Paste meeting transcript from Fireflies / Otter..."></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="genIntel()">⚡ Generate Sales Brief</button>
+    <div id="il" hidden><div class="load-box"><div class="spinner"></div>Generating brief for ${c.name}...</div></div>
+    <div id="ir" hidden></div>
+  `;
+}
+
+// ── API KEY ──────────────────────────────────────────────
+function getKey(){ return localStorage.getItem("sm_api_key")||""; }
+
+// ── API CALL ──────────────────────────────────────────────
+async function callClaude(msgText){
+  let apiKey=getKey();
+  if(!apiKey){
+    apiKey=window.prompt("Enter your Anthropic API key (sk-ant-...):\n\nGet it at console.anthropic.com → API Keys","");
+    if(apiKey&&apiKey.startsWith("sk-")) localStorage.setItem("sm_api_key",apiKey);
+    else{ alert("Invalid key"); throw new Error("No API key"); }
+  }
+  }
+  const res=await fetch("/api/claude",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      model:"claude-3-5-sonnet-20241022",
+      max_tokens:2500,
+      messages:[{role:"user",content:msgText}]
+    })
+  });
+  if(res.status===401){ localStorage.removeItem("sm_api_key"); throw new Error("Invalid API key - please check Netlify configuration"); }
+  if(!res.ok) throw new Error("API error "+res.status);
+  const data=await res.json();
+  const raw=data.content?.find(b=>b.type==="text")?.text||"";
+  const m=raw.match(/\{[\s\S]*\}/);
+  return JSON.parse(m?m[0]:raw);
+}
+
+async function genIntel(){
+  const c=selC;
+  const res=document.getElementById('i-res').value.trim();
+  const goal=document.getElementById('i-goal').value.trim();
+  const pers=document.getElementById('i-pers').value.trim();
+  const team=document.getElementById('i-team').value.trim();
+  const trans=document.getElementById('i-trans').value.trim();
+  if(!res&&!team&&!trans){alert('Please add at least some research or team insights.');return;}
+
+  document.getElementById('il').hidden=false;
+  document.getElementById('ir').hidden=true;
+
+  const prompt=`You are an enterprise sales expert at Software Mind — a software house specializing in cloud, AI/Data, system modernization, and development acceleration.
+
+CLIENT: ${c.name}
+VERTICAL: ${c.vertical}
+REVENUE 2025: ${fmt(c.rev)} | Jan 2026: ${fmt(c.jan)}
+GOAL OF CONVERSATION: ${goal||'account review / upsell'}
+PERSONA: ${pers||'CTO/VP Engineering'}
+
+PRE-CALL RESEARCH:
+${res||'(none provided)'}
+
+INSIGHTS FROM OUR EMBEDDED TEAM:
+${team||'(none provided)'}
+
+${trans?`MEETING TRANSCRIPT:\n${trans}`:''}
+
+Based on the above, generate a sales brief. Return ONLY valid JSON, no other text:
+{"summary":"3 sentences on the client situation and our opportunity","pains":["pain 1","pain 2","pain 3","pain 4"],"opportunities":[{"area":"area name","description":"description of opportunity","urgency":"high"}],"objections":[{"q":"expected objection","a":"how to respond"}],"questions":["question to ask in the meeting"],"next_steps":["step 1","step 2","step 3"],"follow_up":"Draft follow-up email in English — subject on the first line as SUBJECT: ..., then body. Concise, professional, with a specific CTA."}`;
+
+  try{
+    const d=await callClaude(prompt);
+    document.getElementById('il').hidden=true;
+    document.getElementById('ir').hidden=false;
+    renderIntelResults(d);
+    document.getElementById('ir').scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(e){
+    document.getElementById('il').hidden=true;
+    alert('Generation failed. Check console for details.'); console.error(e);
+  }
+}
+
+function renderIntelResults(d){
+  const uc={'high':'tr','medium':'ta','low':'tg'};
+  document.getElementById('ir').innerHTML=`
+    <div class="sep"></div>
+    <div style="font-size:15px;font-weight:600;margin-bottom:16px;">📋 Sales Brief</div>
+
+    <div class="res-sec"><div class="res-label">Situation</div>
+    <div class="card"><div style="font-size:13px;line-height:1.6;">${d.summary}</div></div></div>
+
+    <div class="res-sec"><div class="res-label">Identified Pain Points</div>
+    <div class="card">${d.pains.map(p=>`<div class="ritem">🔥 ${p}</div>`).join('')}</div></div>
+
+    <div class="res-sec"><div class="res-label">Sales Opportunities</div>
+    ${d.opportunities.map(o=>`<div class="obj-box"><div class="obj-q">${o.area} <span class="tag ${uc[o.urgency]||'tb'}">${o.urgency}</span></div><div class="obj-a">${o.description}</div></div>`).join('')}</div>
+
+    <div class="res-sec"><div class="res-label">Questions to Ask in the Meeting</div>
+    <div class="card"><ul style="list-style:none;">${d.questions.map(q=>`<li class="ritem">› ${q}</li>`).join('')}</ul></div></div>
+
+    <div class="res-sec"><div class="res-label">Expected Objections</div>
+    ${d.objections.map(o=>`<div class="obj-box"><div class="obj-q">💬 ${o.q}</div><div class="obj-a">${o.a}</div></div>`).join('')}</div>
+
+    <div class="res-sec"><div class="res-label">Next Steps</div>
+    <div class="card">${d.next_steps.map((s,i)=>`<div class="ritem"><strong>${i+1}.</strong> ${s}</div>`).join('')}</div></div>
+
+    <div class="res-sec">
+      <div class="res-label" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Follow-up Email Draft</span>
+        <button class="copy-btn" onclick="copyFU()">Copy</button>
+      </div>
+      <div class="mono-box" id="fu-text">${d.follow_up}</div>
+    </div>
+    <div class="export-btns">
+      <button class="btn btn-primary" onclick="window.print()">Export to PDF</button>
+      <button class="btn btn-sec" onclick="exportDoc()">Export to DOC</button>
+    </div>
+  `;
+}
+
+function exportDoc(){
+  const content = document.getElementById('ir').innerHTML;
+  const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' "+
+        "xmlns:w='urn:schemas-microsoft-com:office:word' "+
+        "xmlns='http://www.w3.org/TR/REC-html40'>"+
+        "<head><meta charset='utf-8'><title>Sales Brief</title></head><body>";
+  const footer = "</body></html>";
+  const sourceHTML = header+content+footer;
+  
+  const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+  const fileDownload = document.createElement("a");
+  document.body.appendChild(fileDownload);
+  fileDownload.href = source;
+  fileDownload.download = 'Sales_Brief.doc';
+  fileDownload.click();
+  document.body.removeChild(fileDownload);
+}
+
+function copyFU(){
+  const t=document.getElementById('fu-text').textContent;
+  navigator.clipboard.writeText(t).then(()=>{
+    const b=event.target; b.textContent='✓ Copied'; setTimeout(()=>b.textContent='Copy',2000);
+  });
+}
+
+// ── NAV ───────────────────────────────────────────────────
+function nav(v,btn){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  document.getElementById('v-'+v).classList.add('active');
+  btn.classList.add('active');
+}
+function trackTab(id,btn){
+  document.querySelectorAll('.tpanel').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.ttab').forEach(x=>x.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── INIT ──────────────────────────────────────────────────
+buildCats(CLIENT_CATS,'cats-client', 'c');
+buildCats(TEAM_CATS,'cats-team', 't');
+renderC();
+</script>
+</body>
+</html>
