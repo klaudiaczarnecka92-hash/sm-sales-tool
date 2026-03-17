@@ -303,7 +303,6 @@ const TEAM_CATS=[
 function saveAns(qid, val){
   if(!selC) return;
   const key = 'sm_answers_' + selC.rank;
-  console.log('Saving to', key, qid, val);
   const answers = JSON.parse(localStorage.getItem(key) || '{}');
   answers[qid] = val;
   localStorage.setItem(key, JSON.stringify(answers));
@@ -313,7 +312,6 @@ function getAns(qid){
   const key = 'sm_answers_' + selC.rank;
   const answers = JSON.parse(localStorage.getItem(key) || '{}');
   const val = answers[qid] || '';
-  console.log('Loading from', key, qid, val);
   return val;
 }
 function clearAllAnswers(){
@@ -376,7 +374,6 @@ function filterC(q){
 
 function selClient(rank){
   selC=CLIENTS.find(c=>c.rank===rank);
-  console.log('Selected client:', selC.name, 'Rank:', selC.rank);
   renderC();
   renderIntelForm();
   // Refresh cheat sheets with specific client answers
