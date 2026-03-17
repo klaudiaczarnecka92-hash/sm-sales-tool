@@ -412,23 +412,26 @@ function getKey(){ return localStorage.getItem("sm_api_key")||""; }
 
 // ── API CALL ──────────────────────────────────────────────
 async function callClaude(msgText){
-  const res = await fetch("/api/claude", {
+  const res = await fetch("/.netlify/functions/claude", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "claude-sonnet-4-5",
+      model: "claude-3-5-sonnet-20241022",
       max_tokens: 2500,
       messages: [{ role: "user", content: msgText }]
     })
   });
 
-  const data = await res.json();
+  const text = await res.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (e) {
+    throw new Error("Server returned non-JSON response in /.netlify/functions/claude (" + res.status + "): " + text.slice(0, 200));
+  }
 
   if (!res.ok) {
     const errorMsg = data.error?.message || data.message || JSON.stringify(data);
-    if (res.status === 401) {
-      throw new Error("Invalid Anthropic API Key. Please verify the key in Netlify settings.\n\nDetails: " + errorMsg);
-    }
     throw new Error("AI API Error (" + res.status + "): " + errorMsg);
   }
 
