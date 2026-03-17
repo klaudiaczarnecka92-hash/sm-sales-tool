@@ -155,11 +155,6 @@ textarea{resize:vertical;}
 
 <!-- MAIN -->
 <div class="main">
-<div style="background:#fef9c3;border-bottom:1px solid #fde047;padding:10px 32px;display:flex;align-items:center;gap:12px;font-size:13px;">
-  <span style="font-weight:500;white-space:nowrap;">🔑 Anthropic API Key:</span>
-  <input id="api-key-input" type="password" placeholder="sk-ant-..." style="flex:1;max-width:420px;background:#fff;border:1px solid #fde047;border-radius:6px;padding:6px 10px;font-size:13px;color:#1a1a18;"/>
-  <span style="color:#92400e;">Get it at <a href="https://console.anthropic.com" target="_blank" style="color:#92400e;">console.anthropic.com</a> → API Keys</span>
-</div>
 
   <!-- CHEAT SHEET -->
   <div class="view active" id="v-cheat">
@@ -417,12 +412,6 @@ function getKey(){ return localStorage.getItem("sm_api_key")||""; }
 
 // ── API CALL ──────────────────────────────────────────────
 async function callClaude(msgText){
-  let apiKey=getKey();
-  if(!apiKey){
-    apiKey=window.prompt("Enter your Anthropic API key (sk-ant-...):\n\nGet it at console.anthropic.com → API Keys","");
-    if(apiKey&&apiKey.startsWith("sk-")) localStorage.setItem("sm_api_key",apiKey);
-    else{ alert("Invalid key"); throw new Error("No API key"); }
-  }
   const res=await fetch("/api/claude",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
