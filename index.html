@@ -412,21 +412,36 @@ function getKey(){ return localStorage.getItem("sm_api_key")||""; }
 
 // ── API CALL ──────────────────────────────────────────────
 async function callClaude(msgText){
-  const res=await fetch("/api/claude",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      model:"claude-3-5-sonnet-20241022",
-      max_tokens:2500,
-      messages:[{role:"user",content:msgText}]
+  const res = await fetch("/api/claude", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-3-5-sonnet-20241022",
+      max_tokens: 2500,
+      messages: [{ role: "user", content: msgText }]
     })
   });
-  if(res.status===401){ localStorage.removeItem("sm_api_key"); throw new Error("Invalid API key - please check Netlify configuration"); }
-  if(!res.ok) throw new Error("API error "+res.status);
-  const data=await res.json();
-  const raw=data.content?.find(b=>b.type==="text")?.text||"";
-  const m=raw.match(/\{[\s\S]*\}/);
-  return JSON.parse(m?m[0]:raw);
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    const errorMsg = data.error?.message || data.message || JSON.stringify(data);
+    if (res.status === 401) {
+      throw new Error("Invalid Anthropic API Key. Please verify the key in Netlify settings.\n\nDetails: " + errorMsg);
+    }
+    throw new Error("AI API Error (" + res.status + "): " + errorMsg);
+  }
+
+  const raw = data.content?.find(b => b.type === "text")?.text || "";
+  if (!raw) throw new Error("AI returned an empty response.");
+
+  try {
+    const m = raw.match(/\{[\s\S]*\}/);
+    return JSON.parse(m ? m[0] : raw);
+  } catch (e) {
+    console.error("Failed to parse AI response:", raw);
+    throw new Error("AI returned invalid data format. Please try again.");
+  }
 }
 
 async function genIntel(){
