@@ -314,8 +314,9 @@ function getAns(qid){
   return answers[qid] || '';
 }
 function clearAllAnswers(){
-  if(confirm('Clear all answers?')){
-    localStorage.removeItem('sm_answers');
+  if(!selC) return;
+  if(confirm('Clear all answers for ' + selC.name + '?')){
+    localStorage.removeItem('sm_answers_' + selC.rank);
     location.reload();
   }
 }
@@ -375,8 +376,8 @@ function selClient(rank){
   renderC();
   renderIntelForm();
   // Refresh cheat sheets with specific client answers
-  buildCats(CLIENT_CATS, 'cat-client', 'c');
-  buildCats(TEAM_CATS, 'cat-team', 't');
+  buildCats(CLIENT_CATS, 'cats-client', 'c');
+  buildCats(TEAM_CATS, 'cats-team', 't');
 }
 
 function renderIntelForm(){
