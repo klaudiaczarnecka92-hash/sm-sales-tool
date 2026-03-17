@@ -136,10 +136,18 @@ textarea{resize:vertical;}
 .btn-small{font-size:11px;padding:4px 8px;width:auto;display:inline-block;margin-top:0;}
 .export-btns{display:flex;gap:8px;margin-top:16px;}
 @media print {
-  .sidebar, .track-tabs, #api-key-input, .cl-list, .btn, .copy-btn, .sep, .nav-item, #v-cheat { display: none !important; }
-  .main { padding: 0; }
-  .card { border: 1px solid #ccc; break-inside: avoid; }
+  body { background: white; color: black; }
+  .sidebar, .track-tabs, .cl-list, .btn, .copy-btn, .sep, .nav-item, #cl-search, .logo, .cat-head { display: none !important; }
+  .shell, .main { display: block; height: auto; overflow: visible; padding: 0; }
+  .view { display: none; width: 100%; max-width: 100%; }
   .view.active { display: block !important; }
+  .card { border: 1px solid #eee; break-inside: avoid; background: white; margin-bottom: 20px; box-shadow: none; }
+  .page-h { font-size: 24px; margin-bottom: 10px; }
+  .page-sub { margin-bottom: 30px; font-size: 14px; }
+  textarea { display: none !important; }
+  .q-ans { display: block; border: 1px solid #eee; padding: 10px; font-size: 12px; margin-top: 10px; background: #fafafa; }
+  /* Ensure brief results are fully visible */
+  #ir { display: block !important; width: 100%; }
 }
 </style>
 </head>
@@ -168,7 +176,8 @@ textarea{resize:vertical;}
 
     <!-- CLIENT -->
     <div class="tpanel active" id="tc">
-      <div style="margin-bottom:12px;display:flex;justify-content:flex-end;">
+      <div style="margin-bottom:12px;display:flex;justify-content:flex-end;gap:8px;">
+        <button class="btn btn-sec btn-small" onclick="exportAnswersArchive()">Export Archive</button>
         <button class="btn btn-sec btn-small" onclick="clearAllAnswers()">Clear All Answers</button>
       </div>
       <div id="cats-client"></div>
@@ -320,6 +329,36 @@ function clearAllAnswers(){
     localStorage.removeItem('sm_answers_' + selC.rank);
     location.reload();
   }
+}
+function exportAnswersArchive(){
+  if(!selC){ alert('Select a client first.'); return; }
+  let txt = `ARCHIVE: Question Cheat Sheet Results\nCLIENT: ${selC.name}\nVERTICAL: ${selC.vertical}\nDATE: ${new Date().toLocaleDateString()}\n\n`;
+  
+  txt += "--- QUESTIONS FOR THE CLIENT ---\n";
+  CLIENT_CATS.forEach((cat, ci) => {
+    txt += `\n[ ${cat.title} ]\n`;
+    cat.qs.forEach((q, qi) => {
+      const ans = getAns(`c_${ci}_${qi}`);
+      if(ans) txt += `Q: ${q.t}\nA: ${ans}\n\n`;
+    });
+  });
+
+  txt += "\n--- QUESTIONS FOR OUR EMBEDDED TEAM ---\n";
+  TEAM_CATS.forEach((cat, ci) => {
+    txt += `\n[ ${cat.title} ]\n`;
+    cat.qs.forEach((q, qi) => {
+      const ans = getAns(`t_${ci}_${qi}`);
+      if(ans) txt += `Q: ${q.t}\nA: ${ans}\n\n`;
+    });
+  });
+
+  const blob = new Blob([txt], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Archive_${selC.name.replace(/\s+/g, '_')}_Answers.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 // ── RENDER CHEAT ──────────────────────────────────────────
