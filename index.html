@@ -412,6 +412,7 @@ function getKey(){ return localStorage.getItem("sm_api_key")||""; }
 
 // ── API CALL ──────────────────────────────────────────────
 async function callClaude(msgText){
+  console.log("Calling Claude with model: claude-sonnet-4-6");
   const res = await fetch("/.netlify/functions/claude", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
