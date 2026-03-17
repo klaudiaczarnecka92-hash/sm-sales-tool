@@ -483,7 +483,8 @@ Based on the above, generate a sales brief. Return ONLY valid JSON, no other tex
     document.getElementById('ir').scrollIntoView({behavior:'smooth',block:'start'});
   }catch(e){
     document.getElementById('il').hidden=true;
-    alert('Generation failed. Check console for details.'); console.error(e);
+    alert('Generation failed: ' + e.message); 
+    console.error(e);
   }
 }
 
