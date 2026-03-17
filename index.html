@@ -136,18 +136,46 @@ textarea{resize:vertical;}
 .btn-small{font-size:11px;padding:4px 8px;width:auto;display:inline-block;margin-top:0;}
 .export-btns{display:flex;gap:8px;margin-top:16px;}
 @media print {
-  body { background: white; color: black; }
-  .sidebar, .track-tabs, .cl-list, .btn, .copy-btn, .sep, .nav-item, #cl-search, .logo, .cat-head { display: none !important; }
-  .shell, .main { display: block; height: auto; overflow: visible; padding: 0; }
-  .view { display: none; width: 100%; max-width: 100%; }
-  .view.active { display: block !important; }
-  .card { border: 1px solid #eee; break-inside: avoid; background: white; margin-bottom: 20px; box-shadow: none; }
-  .page-h { font-size: 24px; margin-bottom: 10px; }
-  .page-sub { margin-bottom: 30px; font-size: 14px; }
+  /* Reset Page and Layout */
+  @page { margin: 20mm; size: A4; }
+  body { background: white !important; color: black !important; font-family: "Georgia", serif; font-size: 12pt; line-height: 1.6; }
+  
+  /* Hide all UI Noise */
+  .sidebar, .track-tabs, .cl-list, .btn, .copy-btn, .sep, .nav-item, #cl-search, .logo, .cat-head, .export-btns, #api-key-input, .btn-small { 
+    display: none !important; 
+  }
+  
+  /* Force single column layout */
+  .shell, .main { display: block !important; width: 100% !important; max-width: 100% !important; height: auto !important; overflow: visible !important; padding: 0 !important; margin: 0 !important; background: none !important; box-shadow: none !important; }
+  .view { display: none; padding: 0 !important; }
+  .view.active { display: block !important; width: 100% !important; }
+  
+  /* Card and Typography adjustments */
+  .card { border: none !important; box-shadow: none !important; padding: 0 !important; margin-bottom: 30px; break-inside: auto; background: white !important; }
+  .page-h { font-size: 26pt; font-weight: bold; margin-bottom: 12pt; color: #000; border-bottom: 2px solid #333; padding-bottom: 6pt; }
+  .page-sub { font-size: 11pt; font-style: italic; color: #555; margin-bottom: 40px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+  
+  /* Handle Specific Content Sections */
+  h1, h2, h3, h4 { page-break-after: avoid; color: #1a1a1a; margin-top: 24pt; margin-bottom: 10pt; }
+  p, li { break-inside: avoid; margin-bottom: 10pt; }
+  
+  /* Brief Results Area */
+  #ir { display: block !important; width: 100% !important; overflow: visible !important; height: auto !important; font-size: 11pt; }
+  
+  /* Hide textareas and show content labels */
   textarea { display: none !important; }
-  .q-ans { display: block; border: 1px solid #eee; padding: 10px; font-size: 12px; margin-top: 10px; background: #fafafa; }
-  /* Ensure brief results are fully visible */
-  #ir { display: block !important; width: 100%; }
+  .q-ans { display: block; border: 1px solid #ddd; padding: 15px; font-size: 10.5pt; margin-top: 10px; background: #fdfdfd; break-inside: avoid; }
+  
+  /* Ensure logo or header info is present if needed, else hide */
+  .main:before {
+    content: "Sales Intelligence Brief";
+    display: block;
+    font-size: 9pt;
+    text-transform: uppercase;
+    color: #999;
+    text-align: right;
+    margin-bottom: 20px;
+  }
 }
 </style>
 </head>
