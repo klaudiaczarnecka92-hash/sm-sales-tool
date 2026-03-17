@@ -301,12 +301,16 @@ const TEAM_CATS=[
 
 // ── STORAGE ───────────────────────────────────────────────
 function saveAns(qid, val){
-  const answers = JSON.parse(localStorage.getItem('sm_answers') || '{}');
+  if(!selC) return;
+  const key = 'sm_answers_' + selC.rank;
+  const answers = JSON.parse(localStorage.getItem(key) || '{}');
   answers[qid] = val;
-  localStorage.setItem('sm_answers', JSON.stringify(answers));
+  localStorage.setItem(key, JSON.stringify(answers));
 }
 function getAns(qid){
-  const answers = JSON.parse(localStorage.getItem('sm_answers') || '{}');
+  if(!selC) return '';
+  const key = 'sm_answers_' + selC.rank;
+  const answers = JSON.parse(localStorage.getItem(key) || '{}');
   return answers[qid] || '';
 }
 function clearAllAnswers(){
@@ -370,6 +374,9 @@ function selClient(rank){
   selC=CLIENTS.find(c=>c.rank===rank);
   renderC();
   renderIntelForm();
+  // Refresh cheat sheets with specific client answers
+  buildCats(CLIENT_CATS, 'cat-client', 'c');
+  buildCats(TEAM_CATS, 'cat-team', 't');
 }
 
 function renderIntelForm(){
