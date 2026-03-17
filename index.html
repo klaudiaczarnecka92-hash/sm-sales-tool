@@ -423,7 +423,6 @@ async function callClaude(msgText){
     if(apiKey&&apiKey.startsWith("sk-")) localStorage.setItem("sm_api_key",apiKey);
     else{ alert("Invalid key"); throw new Error("No API key"); }
   }
-  }
   const res=await fetch("/api/claude",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
