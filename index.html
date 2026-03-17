@@ -145,13 +145,17 @@ textarea{resize:vertical;}
     display: none !important; 
   }
   
-  /* Force single column layout */
+  /* Force single column layout and clear all restricted heights/overflows */
   .shell, .main { display: block !important; width: 100% !important; max-width: 100% !important; height: auto !important; overflow: visible !important; padding: 0 !important; margin: 0 !important; background: none !important; box-shadow: none !important; }
-  .view { display: none; padding: 0 !important; }
-  .view.active { display: block !important; width: 100% !important; }
+  .view { display: none; padding: 0 !important; width: 100% !important; height: auto !important; overflow: visible !important; }
+  .view.active { display: block !important; }
+  
+  /* Reset deep nested containers that cause cutting/emptiness */
+  .ci-wrap { display: block !important; width: 100% !important; }
+  .intel-col { display: block !important; width: 100% !important; height: auto !important; max-height: none !important; overflow: visible !important; padding: 0 !important; }
   
   /* Card and Typography adjustments */
-  .card { border: none !important; box-shadow: none !important; padding: 0 !important; margin-bottom: 30px; break-inside: auto; background: white !important; }
+  .card { border: none !important; box-shadow: none !important; padding: 0 !important; margin-bottom: 30px; break-inside: avoid; background: white !important; }
   .page-h { font-size: 26pt; font-weight: bold; margin-bottom: 12pt; color: #000; border-bottom: 2px solid #333; padding-bottom: 6pt; }
   .page-sub { font-size: 11pt; font-style: italic; color: #555; margin-bottom: 40px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
   
@@ -159,14 +163,15 @@ textarea{resize:vertical;}
   h1, h2, h3, h4 { page-break-after: avoid; color: #1a1a1a; margin-top: 24pt; margin-bottom: 10pt; }
   p, li { break-inside: avoid; margin-bottom: 10pt; }
   
-  /* Brief Results Area */
-  #ir { display: block !important; width: 100% !important; overflow: visible !important; height: auto !important; font-size: 11pt; }
+  /* Brief Results Area - CRITICAL: Force visibility even if JS set hidden */
+  #ir { display: block !important; visibility: visible !important; opacity: 1 !important; width: 100% !important; overflow: visible !important; height: auto !important; font-size: 11pt; }
+  #il { display: none !important; } /* Hide loading state in print */
   
   /* Hide textareas and show content labels */
   textarea { display: none !important; }
   .q-ans { display: block; border: 1px solid #ddd; padding: 15px; font-size: 10.5pt; margin-top: 10px; background: #fdfdfd; break-inside: avoid; }
   
-  /* Ensure logo or header info is present if needed, else hide */
+  /* Custom Header */
   .main:before {
     content: "Sales Intelligence Brief";
     display: block;
